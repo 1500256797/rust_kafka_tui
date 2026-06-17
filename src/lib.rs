@@ -1,0 +1,9 @@
+pub mod app;
+pub mod clipboard;
+pub mod config;
+pub mod error;
+pub mod kafka;
+pub mod schema;
+pub mod service;
+pub mod terminal;
+pub mod ui;

@@ -1,0 +1,1 @@
+// Spinner integrated in footer

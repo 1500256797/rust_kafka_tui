@@ -1,0 +1,17 @@
+# 本地 Podman Kafka 开发配置（podman/compose.yaml）
+connections:
+  local:
+    properties:
+      bootstrap.servers: "localhost:9092"
+    allow-produce: true
+
+topic:
+  replication: 1
+  partition: 1
+
+topic-data:
+  page-size: 50
+  poll-timeout-ms: 1000
+  max-message-length: 1000000
+  default-format: auto
+  cache-pages: 10

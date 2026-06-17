@@ -1,0 +1,27 @@
+connections:
+  dev-cluster:
+    properties:
+      bootstrap.servers: "localhost:9092"
+    allow-produce: true
+
+  prod-readonly:
+    properties:
+      bootstrap.servers: "prod-broker:9092"
+      security.protocol: "SASL_SSL"
+      sasl.mechanism: "PLAIN"
+      sasl.username: "${KAFKA_USERNAME}"
+      sasl.password: "${KAFKA_PASSWORD}"
+    schema-registry:
+      url: "http://prod-schema-registry:8081"
+    allow-produce: false
+
+topic:
+  replication: 3
+  partition: 3
+
+topic-data:
+  page-size: 50
+  poll-timeout-ms: 1000
+  max-message-length: 1000000
+  default-format: auto
+  cache-pages: 10
