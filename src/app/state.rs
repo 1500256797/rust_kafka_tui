@@ -218,6 +218,7 @@ impl DialogChoice {
 #[derive(Debug, Clone)]
 pub enum Modal {
     Help,
+    PartitionInfo,
     ClusterPicker { selected: usize },
     PageSizePicker { selected: usize, anchor: Rect },
     GoToOffsetInput { input: String },

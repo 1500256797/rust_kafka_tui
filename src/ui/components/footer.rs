@@ -13,7 +13,7 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
         Screen::ClusterSelect => " j/k:选择 Enter:连接 c:Cluster下拉 q:退出 ?:帮助",
         Screen::TopicList => " j/k:移动 Enter:进入 /:搜索 r:刷新 i:内部Topic Alt+←/→:前进后退 c:Cluster q:退出",
         Screen::MessageBrowser => {
-            " j/k:移动 点击[50▼]:每页条数 ◀▶:翻页 n/p:翻页 f:格式 y:复制 Reply:重发 q:退出"
+            " j/k:移动 ◀▶/n/p:翻页 [50▼]:每页条数 i:分区信息 f:格式 y:复制 Reply:重发 q:退出"
         }
     };
 

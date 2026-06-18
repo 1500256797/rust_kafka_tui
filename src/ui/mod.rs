@@ -17,6 +17,7 @@ pub mod theme {
 pub mod cluster;
 pub mod help;
 pub mod message_browser;
+pub mod partition_info;
 pub mod message_detail;
 pub mod produce_modal;
 pub mod reply_preview_modal;
@@ -92,6 +93,7 @@ fn render_screen(frame: &mut Frame, content_area: ratatui::layout::Rect, app: &m
 fn render_modal(frame: &mut Frame, area: ratatui::layout::Rect, app: &App, modal: &Modal) {
     match modal {
         Modal::Help => help::render(frame, area),
+        Modal::PartitionInfo => partition_info::render(frame, area, app),
         Modal::GoToOffsetInput { input } => {
             components::modal::render_input_modal(frame, area, "Go to Offset", input);
         }

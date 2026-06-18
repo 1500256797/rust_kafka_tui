@@ -46,6 +46,7 @@ pub fn render(frame: &mut Frame, area: Rect) {
    点击 [50▼]  切换每页条数 (20/50/100)
    b/l      从头/从末尾
    g/t      跳转 offset/timestamp
+   i        分区信息（每分区 offset 范围 / 条数）
    m        切换 Merged/Single 模式
    f        切换格式
    d        展开/折叠详情

@@ -151,7 +151,7 @@ pub fn handle_mouse(
     }
 
     if app.modal.is_some() {
-        if matches!(app.modal, Some(Modal::Help))
+        if matches!(app.modal, Some(Modal::Help) | Some(Modal::PartitionInfo))
             && matches!(mouse.kind, MouseEventKind::Down(_))
         {
             app.close_modal();
@@ -397,6 +397,7 @@ fn open_topic_at(app: &mut App, cmd_tx: &CommandSender, index: usize) {
             current_page: 1,
             total_pages: 1,
             total_messages_estimate: 0,
+            partitions: vec![],
             loading: true,
             selected: 0,
             detail_expanded: true,
@@ -608,6 +609,7 @@ fn handle_message_browser_key(
                 app.open_modal(Modal::Produce(draft));
             }
         }
+        KeyCode::Char('i') => app.open_modal(Modal::PartitionInfo),
         KeyCode::Char('?') => app.open_modal(Modal::Help),
         _ => {}
     }
@@ -815,6 +817,14 @@ fn handle_modal_key(
     match app.modal.clone() {
         Some(Modal::Help) => {
             if matches!(key.code, KeyCode::Esc | KeyCode::Char('?')) {
+                app.close_modal();
+            }
+        }
+        Some(Modal::PartitionInfo) => {
+            if matches!(
+                key.code,
+                KeyCode::Esc | KeyCode::Char('i') | KeyCode::Char('q')
+            ) {
                 app.close_modal();
             }
         }
