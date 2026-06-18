@@ -1,5 +1,6 @@
 use kafka_tui::app::{
     handle_kafka_event, handle_key, handle_mouse, App, CommandSender, KafkaCommand, KafkaEvent,
+    Notification,
 };
 use kafka_tui::clipboard::ClipboardService;
 use kafka_tui::config::{load_config, Cli};
@@ -49,6 +50,10 @@ fn main() -> Result<()> {
     if let Some(cluster) = cli.cluster.clone() {
         app.connection_status = kafka_tui::app::ConnectionStatus::Connecting;
         app.current_cluster = Some(cluster.clone());
+        app.show_notification(Notification::info(
+            format!("正在连接 {}...", cluster),
+            Duration::from_secs(3),
+        ));
         let _ = cmd_tx.send(KafkaCommand::Connect { cluster });
     }
 

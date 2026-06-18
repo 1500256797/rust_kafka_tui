@@ -1,6 +1,6 @@
 use ratatui::Frame;
-use ratatui::layout::{Constraint, Layout, Rect};
-use ratatui::widgets::{Block, Borders, Cell, Row, Table};
+use ratatui::layout::{Alignment, Constraint, Layout, Rect};
+use ratatui::widgets::{Block, Borders, Cell, Paragraph, Row, Table};
 
 use crate::app::{App, ListHitArea};
 use crate::ui::components::pager_bar;
@@ -20,6 +20,32 @@ pub fn render(frame: &mut Frame, area: Rect, app: &mut App) {
         );
         return;
     };
+
+    if browser.messages.is_empty() {
+        let msg = if browser.loading {
+            "正在加载消息..."
+        } else {
+            "本页暂无消息"
+        };
+        let block = Block::default()
+            .borders(Borders::ALL)
+            .title(format!(" {} ", browser.topic))
+            .border_style(theme::HEADER);
+        frame.render_widget(
+            Paragraph::new(msg)
+                .block(block)
+                .alignment(Alignment::Center)
+                .style(theme::FOOTER),
+            area,
+        );
+        app.hit_areas.list = Some(ListHitArea {
+            body: inner_rect(area),
+            row_count: 0,
+            scroll_offset: 0,
+            reply_buttons: vec![],
+        });
+        return;
+    }
 
     let format_label = app.format_override.label();
     let readonly = app.is_readonly();

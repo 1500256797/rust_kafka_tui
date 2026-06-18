@@ -1,21 +1,70 @@
 use ratatui::Frame;
-use ratatui::layout::Rect;
-use ratatui::widgets::{Block, Borders, Cell, Row, Table};
+use ratatui::layout::{Alignment, Rect};
+use ratatui::widgets::{Block, Borders, Cell, Paragraph, Row, Table};
 
 use crate::app::{App, ListHitArea};
 use crate::ui::theme;
 
 pub fn render(frame: &mut Frame, area: Rect, app: &mut App) {
     let filtered = app.filtered_topics();
-    let filter_hint = if app.filter_mode || !app.topic_filter.is_empty() {
-        format!(" 搜索: {} ", app.topic_filter)
+
+    if filtered.is_empty() {
+        let msg = if app.topics_loading {
+            "正在加载 Topic 列表..."
+        } else if !app.topic_filter.is_empty() {
+            "没有匹配的 Topic（Backspace 清除搜索）"
+        } else {
+            "暂无 Topic（r 刷新 / i 切换内部 Topic）"
+        };
+        let block = Block::default()
+            .borders(Borders::ALL)
+            .title(" Topic 列表 ")
+            .border_style(theme::HEADER);
+        frame.render_widget(
+            Paragraph::new(msg)
+                .block(block)
+                .alignment(Alignment::Center)
+                .style(theme::FOOTER),
+            area,
+        );
+        app.hit_areas.list = Some(ListHitArea {
+            body: inner_rect(area),
+            row_count: 0,
+            scroll_offset: 0,
+            reply_buttons: vec![],
+        });
+        return;
+    }
+
+    let total = filtered.len();
+    let loading_mark = if app.topics_loading { " ⟳" } else { "" };
+    let title = if app.filter_mode || !app.topic_filter.is_empty() {
+        format!(
+            " 搜索: {} ({}/{}){} ",
+            app.topic_filter,
+            app.topic_selected + 1,
+            total,
+            loading_mark
+        )
     } else {
-        " Topic 列表 ".to_string()
+        format!(
+            " Topic 列表 ({}/{}){} ",
+            app.topic_selected + 1,
+            total,
+            loading_mark
+        )
     };
+
+    let inner = inner_rect(area);
+    // header 占用 2 行（标题行 + bottom_margin）
+    let visible_rows = inner.height.saturating_sub(2) as usize;
+    let scroll = table_scroll(app.topic_selected, visible_rows, total);
 
     let rows: Vec<Row> = filtered
         .iter()
         .enumerate()
+        .skip(scroll)
+        .take(visible_rows.max(1))
         .map(|(i, t)| {
             let style = if i == app.topic_selected {
                 theme::SELECTED
@@ -47,25 +96,38 @@ pub fn render(frame: &mut Frame, area: Rect, app: &mut App) {
     .block(
         Block::default()
             .borders(Borders::ALL)
-            .title(filter_hint)
+            .title(title)
             .border_style(theme::HEADER),
     );
 
     frame.render_widget(table, area);
 
-    let inner = inner_rect(area);
     let body = Rect {
         x: inner.x,
         y: inner.y.saturating_add(2),
         width: inner.width,
         height: inner.height.saturating_sub(2),
     };
+    let visible_count = total.saturating_sub(scroll).min(visible_rows.max(1));
     app.hit_areas.list = Some(ListHitArea {
         body,
-        row_count: filtered.len(),
-        scroll_offset: 0,
+        row_count: visible_count,
+        scroll_offset: scroll,
         reply_buttons: vec![],
     });
+}
+
+fn table_scroll(selected: usize, visible_rows: usize, total: usize) -> usize {
+    if visible_rows == 0 || total <= visible_rows {
+        return 0;
+    }
+    if selected >= total.saturating_sub(visible_rows) {
+        total.saturating_sub(visible_rows)
+    } else if selected >= visible_rows {
+        selected + 1 - visible_rows
+    } else {
+        0
+    }
 }
 
 fn inner_rect(area: Rect) -> Rect {

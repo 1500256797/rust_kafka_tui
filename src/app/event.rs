@@ -361,6 +361,10 @@ fn connect_cluster_from_picker(app: &mut App, cmd_tx: &CommandSender, index: usi
     app.topics.clear();
     app.topics_loading = true;
     app.screen = Screen::TopicList;
+    app.show_notification(Notification::info(
+        format!("正在连接 {}...", cluster),
+        Duration::from_secs(3),
+    ));
     let _ = cmd_tx.send(KafkaCommand::Connect { cluster });
 }
 
@@ -447,6 +451,10 @@ fn handle_topic_list_key(app: &mut App, key: KeyEvent, cmd_tx: &CommandSender) {
         }
         KeyCode::Char('r') => {
             app.topics_loading = true;
+            app.show_notification(Notification::info(
+                "正在刷新 Topic 列表...",
+                Duration::from_secs(2),
+            ));
             let _ = cmd_tx.send(KafkaCommand::FetchTopics);
         }
         KeyCode::Char('i') => {
