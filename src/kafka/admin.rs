@@ -43,21 +43,19 @@ impl KafkaAdmin {
             }
             let name = topic.name().to_string();
             let is_internal = name.starts_with("__") || name.starts_with('_');
-            let mut partitions = Vec::new();
-
-            for p in topic.partitions() {
-                let (low, high) = self
-                    .consumer
-                    .fetch_watermarks(&name, p.id(), Duration::from_secs(10))
-                    .map_err(|e| KafkaError::Client(e.to_string()))?;
-
-                partitions.push(PartitionInfo {
+            // 列表阶段只需要分区数量等元信息，不在这里拉每个分区的 watermark
+            // （否则会对每个分区发起一次同步网络往返，topic 多时极慢）。
+            // 真正的 watermark 在进入某个 topic 时由 get_watermarks 单独拉取。
+            let partitions = topic
+                .partitions()
+                .iter()
+                .map(|p| PartitionInfo {
                     id: p.id(),
                     leader: p.leader(),
-                    log_start_offset: low,
-                    high_watermark: high,
-                });
-            }
+                    log_start_offset: 0,
+                    high_watermark: 0,
+                })
+                .collect();
 
             topics.push(TopicInfo {
                 name,
